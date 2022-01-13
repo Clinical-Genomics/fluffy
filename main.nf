@@ -29,8 +29,7 @@ process bwa_aln{
        val(sampleID) from sample_ch
 
     output:
-       file("${sampleID}.bam")
-       file("test")
+       val(sampleID),file("${sampleID}.bam"), file("${sampleID}.bam.bai") into bwa_aln_ch
 
     script:
        def R1 = "<( zcat ${params.fastq}/${sampleID}/*${sampleID}*_R1*fastq.gz )"
@@ -40,6 +39,7 @@ process bwa_aln{
        bwa aln -n 0 -k 0 -t ${task.cpus} ${params.ref} ${R1} > ${sampleID}_R1.sai
        bwa aln -n 0 -k 0 -t ${task.cpus} ${params.ref} ${R2} > ${sampleID}_R2.sai
        bwa sampe -n -1 ${params.ref} ${sampleID}_R1.sai ${sampleID}_R2.sai ${R1} ${R2} | samtools sort --output-fmt BAM -@ ${task.cpus} - > ${sampleID}.bam
+       samtools index ${sampleID}.bam
        """
 
 }
