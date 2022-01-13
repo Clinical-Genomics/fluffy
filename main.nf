@@ -22,7 +22,6 @@ Channel
     .set { sample_ch }
     
 process bwa_aln{
-
     publishDir "${params.output}", mode: 'copy', overwrite: true
 
     input:
@@ -44,3 +43,18 @@ process bwa_aln{
 
 }
 
+process wcx_convert{
+    publishDir "${params.output}", mode: 'copy', overwrite: true
+
+    input:
+       val(sampleID),file(bam),file(bai) from bwa_aln_ch
+
+    output:
+       val(sampleID),file("${sampleID}.wcx.npz") into wcx_convert_ch
+
+    script:
+       """
+       WisecondorX convert ${bam} ${sampleID}.wcx.npz
+       """
+
+}
